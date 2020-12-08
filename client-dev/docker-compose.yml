@@ -1,0 +1,108 @@
+version: "3"
+
+services:
+  ide:
+    image: monstrs/cloud9
+    volumes:
+      - ./:/workspace
+    ports:
+      - 7077:80
+
+  yarn:
+    image: node:9-alpine
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn
+
+  dashboard:
+    image: node:9-alpine
+    working_dir: /workspace/packages/dashboard
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8010
+    ports:
+      - 8010:8010
+
+  dashboard-local:
+    image: node:9-alpine
+    working_dir: /workspace/packages/dashboard
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8010
+      - API_URL=http://localhost:3000
+    ports:
+      - 8010:8010
+
+  cabinet:
+    image: node:9-alpine
+    working_dir: /workspace/packages/cabinet
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8011
+    ports:
+      - 8011:8011
+
+  cabinet-local:
+    image: node:9-alpine
+    working_dir: /workspace/packages/cabinet
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8011
+      - API_URL=http://localhost:3000
+    ports:
+      - 8011:8011
+
+  trade:
+    image: node:9-alpine
+    working_dir: /workspace/packages/trade
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8012
+    ports:
+      - 8012:8012
+
+  trade-local:
+    image: node:9-alpine
+    working_dir: /workspace/packages/trade
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8012
+      - API_URL=http://localhost:3000
+    ports:
+      - 8012:8012
+
+  landing:
+    image: node:9-alpine
+    working_dir: /workspace/packages/landing
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8013
+    ports:
+      - 8013:8013
+
+  landing-local:
+    image: node:9-alpine
+    working_dir: /workspace/packages/landing
+    volumes:
+      - ./:/workspace
+    entrypoint: yarn run dev
+    environment:
+      - PORT=8013
+      - API_URL=http://localhost:3000
+    ports:
+      - 8013:8013

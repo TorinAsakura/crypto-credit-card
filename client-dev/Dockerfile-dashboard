@@ -1,0 +1,18 @@
+FROM node:9-alpine as builder
+
+RUN mkdir /app
+
+ADD . /app
+
+WORKDIR /app/packages/dashboard
+
+RUN yarn install
+RUN yarn run build
+
+FROM nginx
+
+RUN rm -r /etc/nginx/conf.d
+
+COPY packages/dashboard/config/nginx /etc/nginx/conf.d
+
+COPY --from=builder /app/packages/dashboard/dist /app
