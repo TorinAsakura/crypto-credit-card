@@ -1,0 +1,18 @@
+FROM node:9-alpine as builder
+
+RUN mkdir /app
+
+ADD . /app
+
+WORKDIR /app/packages/cabinet
+
+RUN yarn install
+RUN yarn run build
+
+FROM nginx
+
+RUN rm -r /etc/nginx/conf.d
+
+COPY packages/cabinet/config/nginx /etc/nginx/conf.d
+
+COPY --from=builder /app/packages/cabinet/dist /app

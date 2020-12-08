@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "lint": "lerna run lint",
+    "postinstall": "yarn workspace @c3/dashboard run locales:download && yarn workspace @c3/cabinet run locales:download && yarn workspace @c3/trade run locales:download"
+  },
+  "devDependencies": {
+    "lerna": "^2.11.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

@@ -1,0 +1,210 @@
+pipeline:
+  install:
+    image: node:9-alpine
+    commands:
+      - yarn install
+
+  lint:
+    image: node:9-alpine
+    commands:
+      - yarn run lint
+
+  intl_dashboard_sync:
+    image: node:9-alpine
+    secrets: [ lokalise_api_token ]
+    commands:
+      - yarn workspace @c3/dashboard run intl-tools intl:extract ./src
+      - yarn workspace @c3/dashboard run intl-tools lokalise:upload -p 548106635abe85d50ee427.28938472
+
+  intl_cabinet_sync:
+    image: node:9-alpine
+    secrets: [ lokalise_api_token ]
+    commands:
+      - yarn workspace @c3/cabinet run intl-tools intl:extract ./src
+      - yarn workspace @c3/cabinet run intl-tools lokalise:upload -p 361153525abfcdd080ebc4.81601148
+
+  intl_trade_sync:
+    image: node:9-alpine
+    secrets: [ lokalise_api_token ]
+    commands:
+      - yarn workspace @c3/trade run intl-tools intl:extract ./src
+      - yarn workspace @c3/trade run intl-tools lokalise:upload -p 289029595ac28d08804a42.33457144
+
+  intl_landing_sync:
+    image: node:9-alpine
+    secrets: [ lokalise_api_token ]
+    commands:
+      - yarn workspace @c3/landing run intl-tools intl:extract ./src
+      - yarn workspace @c3/landing run intl-tools lokalise:upload -p 458977345af3e3288125c3.81731410
+
+  ecr-dashboard:
+    image: plugins/ecr
+    privileged: true
+    dockerfile: Dockerfile-dashboard
+    repo: 498687423006.dkr.ecr.us-east-1.amazonaws.com/dashboard
+    secrets: [ ecr_access_key, ecr_secret_key ]
+    region: us-east-1
+    tag:
+      - v${DRONE_BUILD_NUMBER}
+      - latest
+    when:
+      event: push
+
+  ecr-cabinet:
+    image: plugins/ecr
+    privileged: true
+    dockerfile: Dockerfile-cabinet
+    repo: 498687423006.dkr.ecr.us-east-1.amazonaws.com/cabinet
+    secrets: [ ecr_access_key, ecr_secret_key ]
+    region: us-east-1
+    tag:
+      - v${DRONE_BUILD_NUMBER}
+      - latest
+    when:
+      event: push
+
+  ecr-trade:
+    image: plugins/ecr
+    privileged: true
+    dockerfile: Dockerfile-trade
+    repo: 498687423006.dkr.ecr.us-east-1.amazonaws.com/trade
+    secrets: [ ecr_access_key, ecr_secret_key ]
+    region: us-east-1
+    tag:
+      - v${DRONE_BUILD_NUMBER}
+      - latest
+    when:
+      event: push
+
+  ecr-landing:
+    image: plugins/ecr
+    privileged: true
+    dockerfile: Dockerfile-landing
+    repo: 498687423006.dkr.ecr.us-east-1.amazonaws.com/newlanding
+    secrets: [ ecr_access_key, ecr_secret_key ]
+    region: us-east-1
+    tag:
+      - v${DRONE_BUILD_NUMBER}
+      - latest
+    when:
+      event: push
+
+  deploy-dashboard-staging:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/dashboard-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=dashboard.stage.cccr.io
+    release: sito-brito
+    tiller_ns: kube-system
+    namespace: staging
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ dev ]
+
+  deploy-dashboard-production:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/dashboard-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=dashboard.cccr.io
+    release: nuka-schtuka
+    tiller_ns: kube-system
+    namespace: production
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ master ]
+
+  deploy-cabinet-staging:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/cabinet-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=cabinet.stage.cccr.io
+    release: ingrus-mugrus
+    tiller_ns: kube-system
+    namespace: staging
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ dev ]
+
+  deploy-cabinet-production:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/cabinet-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=cabinet.cccr.io
+    release: nikomu-nichemu
+    tiller_ns: kube-system
+    namespace: production
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ master ]
+
+  deploy-trade-staging:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/trade-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=stage.c3.exchange
+    release: oitio-riliovi
+    tiller_ns: kube-system
+    namespace: staging
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ dev ]
+
+  deploy-trade-production:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/trade-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=c3.exchange
+    release: lopiki-kuropiki
+    tiller_ns: kube-system
+    namespace: production
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ master ]
+
+  deploy-landing-staging:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/newlanding-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=landing.stage.cccr.io,endpoints.apiUrl=https://api.stage.cccr.io
+    release: travili-morili
+    tiller_ns: kube-system
+    namespace: staging
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ dev ]
+
+  deploy-landing-production:
+    image: quay.io/ipedrazas/drone-helm
+    skip_tls_verify: true
+    helm_repos: chartsrepo=https://charts.sys.cccr.io/
+    chart: chartsrepo/newlanding-frontend
+    values: image.tag=v${DRONE_BUILD_NUMBER},endpoints.hostname=landing.cccr.io,endpoints.apiUrl=https://api.cccr.io
+    release: kashka-malashka
+    tiller_ns: kube-system
+    namespace: production
+    secrets: [ api_server, kubernetes_token, service_account ]
+    when:
+      event: push
+      branch:
+        include: [ master ]

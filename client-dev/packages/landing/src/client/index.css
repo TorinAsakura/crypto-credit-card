@@ -1,0 +1,20 @@
+@import '~reset.css';
+
+html, body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
+
+#app {
+  height: 100%;
+}
+
+@keyframes MOVE-BG {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(46px); }
+}

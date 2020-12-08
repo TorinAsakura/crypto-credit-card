@@ -1,0 +1,22 @@
+FROM node:9-alpine as builder
+
+RUN mkdir /app
+
+ADD . /app
+
+WORKDIR /app
+
+RUN yarn install
+RUN cd /app/packages/landing && yarn run build
+
+FROM node:9-alpine
+
+COPY --from=builder /app /app
+
+WORKDIR /app/packages/landing
+
+ENV NODE_ENV production
+
+EXPOSE 8080
+
+CMD ["node", "-r", "./register", "bin/start.js"]

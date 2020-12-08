@@ -1,0 +1,32 @@
+@import '~reset.css';
+
+html, body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow: hidden;
+  margin: 0;
+}
+
+#app {
+  height: 100%;
+  background: #f1f2f2;
+}
+
+.tether-element {
+  z-index: 999;
+}
+
+.tippy-tooltip {
+  font-family: "Ubuntu", sans-serif;
+}
+
+.gm-style-iw + div {
+  display: none;
+}
+
+.gm-style-iw {
+  text-align:center;
+}
